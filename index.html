@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Coin — your voice French tutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3e9d6;--paper-2:#ede0c8;--ink:#241a12;--ink-soft:#5c4a38;
+    --line:#cdb98f;--burgundy:#7a2330;--terracotta:#c0562f;--bleu:#2f5d7c;
+    --gold:#b8893b;--ok:#3f6b4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Spectral",Georgia,serif;color:var(--ink);background-color:var(--paper);
+    background-image:
+      radial-gradient(circle at 20% 12%, rgba(192,86,47,.10), transparent 42%),
+      radial-gradient(circle at 85% 0%, rgba(47,93,124,.10), transparent 40%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:26px 20px 130px;}
+  header.masthead{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:6px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;}
+  .brand{display:flex;flex-direction:column;}
+  .kicker{font-style:italic;color:var(--burgundy);letter-spacing:.06em;font-size:.82rem;text-transform:uppercase;}
+  h1{font-family:"Fraunces";font-weight:900;font-size:2.6rem;line-height:.92;margin:.06em 0 0;letter-spacing:-.01em;}
+  h1 .accent{color:var(--terracotta);font-style:italic;font-weight:500;}
+  .edition{text-align:right;font-size:.74rem;color:var(--ink-soft);font-style:italic;line-height:1.3;max-width:170px;}
+  .panel{background:rgba(255,251,242,.55);border:1px solid var(--line);border-radius:3px;padding:14px 16px;margin-top:16px;box-shadow:0 1px 0 rgba(0,0,0,.04);}
+  .panel summary{cursor:pointer;font-family:"Fraunces";font-weight:600;font-size:1rem;list-style:none;display:flex;align-items:center;gap:8px;color:var(--ink);}
+  .panel summary::-webkit-details-marker{display:none;}
+  .panel summary .chev{transition:transform .2s;color:var(--burgundy);}
+  .panel[open] summary .chev{transform:rotate(90deg);}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:14px;}
+  @media(max-width:560px){.grid{grid-template-columns:1fr;}}
+  .field label{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:5px;font-weight:600;}
+  select{width:100%;font-family:"Spectral";font-size:.98rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:8px 10px;}
+  .seg{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+  .seg button{flex:1;border:none;background:var(--paper);color:var(--ink-soft);font-family:"Spectral";font-size:.86rem;padding:8px 4px;cursor:pointer;border-right:1px solid var(--line);}
+  .seg button:last-child{border-right:none;}
+  .seg button.on{background:var(--burgundy);color:#fbf3e6;}
+  .rangerow{display:flex;align-items:center;gap:10px;}
+  input[type=range]{flex:1;accent-color:var(--terracotta);}
+  input[type=text]{width:100%;font-family:"Spectral";font-size:.98rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:2px;padding:8px 10px;}
+  .rangeval{font-family:"Fraunces";font-weight:600;min-width:54px;text-align:right;}
+  .stage{margin-top:18px;}
+  .convo{height:clamp(220px,50vh,540px);overflow-y:auto;border:1px solid var(--line);border-radius:3px;background:rgba(255,251,242,.4);padding:16px;scroll-behavior:smooth;}
+  .turn{margin-bottom:16px;animation:rise .4s ease;}
+  @keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .who{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:3px;font-weight:600;}
+  .turn.tutor .who{color:var(--burgundy);}
+  .turn.you .who{color:var(--bleu);}
+  .fr{font-size:1.18rem;line-height:1.5;}
+  .turn.tutor .fr{font-family:"Fraunces";font-weight:500;}
+  .en{font-style:italic;color:var(--ink-soft);font-size:.95rem;margin-top:2px;}
+  .correction{margin-top:7px;font-size:.92rem;color:var(--ok);border-left:2px solid var(--ok);padding-left:9px;font-style:italic;}
+  .placeholder{color:var(--ink-soft);font-style:italic;}
+  .hintbox{margin-top:12px;border:1px dashed var(--terracotta);border-radius:3px;background:rgba(192,86,47,.07);padding:10px 12px;display:none;}
+  .hintbox.show{display:block;animation:rise .3s ease;}
+  .hintbox .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--terracotta);font-weight:600;}
+  .hintbox .ph{font-family:"Fraunces";font-weight:500;font-size:1.1rem;margin-top:3px;}
+  .hintbox .phen{font-style:italic;color:var(--ink-soft);font-size:.92rem;}
+  .controls{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(0deg,var(--paper) 72%,transparent);padding:14px 20px 20px;}
+  .controls-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+  .mic{width:74px;height:74px;border-radius:50%;border:2px solid var(--ink);background:var(--burgundy);color:#fbf3e6;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .15s;box-shadow:0 4px 0 rgba(36,26,18,.2);}
+  .mic:hover{transform:translateY(-1px);}
+  .mic:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(36,26,18,.2);}
+  .mic svg{width:30px;height:30px;}
+  .mic.listening{background:var(--terracotta);animation:pulse 1.1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 4px 0 rgba(36,26,18,.2),0 0 0 0 rgba(192,86,47,.5);}50%{box-shadow:0 4px 0 rgba(36,26,18,.2),0 0 0 14px rgba(192,86,47,0);}}
+  .mic.speaking{background:var(--bleu);}
+  .mic[disabled]{opacity:.4;cursor:not-allowed;}
+  .status{flex:1;font-style:italic;color:var(--ink-soft);font-size:.96rem;}
+  .status b{font-style:normal;color:var(--ink);font-family:"Fraunces";}
+  .minibtns{display:flex;flex-direction:column;gap:6px;}
+  .minibtns button{font-family:"Spectral";font-size:.82rem;border:1px solid var(--line);background:var(--paper-2);color:var(--ink);border-radius:2px;padding:5px 10px;cursor:pointer;}
+  .minibtns button:hover{border-color:var(--ink);}
+  .actionrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+  .btn{font-family:"Fraunces";font-weight:600;font-size:.95rem;cursor:pointer;border:1px solid var(--ink);border-radius:2px;padding:9px 16px;background:var(--ink);color:var(--paper);}
+  .btn.ghost{background:transparent;color:var(--ink);}
+  .btn:hover{opacity:.9;}
+  .langtoggle{display:flex;align-items:center;gap:8px;font-size:.86rem;color:var(--ink-soft);}
+  .typebar{display:none;gap:8px;margin-top:12px;}
+  .typebar.show{display:flex;}
+  .typebar input{flex:1;}
+  .typebar button{flex-shrink:0;}
+  .banner{margin-top:14px;border:1px solid var(--gold);background:rgba(184,137,59,.12);border-radius:3px;padding:10px 13px;font-size:.9rem;color:var(--ink);display:none;}
+  .banner.show{display:block;}
+  footer{margin-top:30px;text-align:center;font-size:.78rem;color:var(--ink-soft);font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="brand">
+      <span class="kicker">Conversation française · à votre rythme</span>
+      <h1>Le&nbsp;Coin <span class="accent">tutor</span></h1>
+    </div>
+    <div class="edition">Works fully offline. Speak, stumble, and be caught.</div>
+  </header>
+
+  <details class="panel" id="settingsPanel" open>
+    <summary><span class="chev">▸</span> Set up your lesson</summary>
+    <div class="grid">
+      <div class="field">
+        <label>Your level</label>
+        <div class="seg" id="segLevel">
+          <button data-v="A1">A1</button>
+          <button data-v="A2" class="on">A2</button>
+          <button data-v="B1">B1</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>English help on stumbles</label>
+        <div class="seg" id="segHelp">
+          <button data-v="off">Hide</button>
+          <button data-v="on" class="on">Show</button>
+        </div>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Pick a conversation</label>
+        <select id="scenario">
+          <option value="free">Free conversation — getting to know you</option>
+          <option value="cafe">At a café — order with the waiter</option>
+          <option value="market">At the market — buy your groceries</option>
+          <option value="directions">Asking for directions in town</option>
+          <option value="day">My day &amp; routine</option>
+          <option value="hobbies">Hobbies &amp; weekends</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1;">
+        <label>Wait before I nudge you (hesitation)</label>
+        <div class="rangerow">
+          <input type="range" id="hesRange" min="3" max="15" step="1" value="7">
+          <span class="rangeval" id="hesVal">7 sec</span>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="banner" id="srBanner"></div>
+
+  <div class="stage">
+    <div class="convo" id="convo">
+      <p class="placeholder">Choose a conversation, press <b>Commencer</b>, and your tutor greets you in French. When the mic turns red it's your turn — just talk. Go quiet, and I'll nudge you, then hand you the words.</p>
+    </div>
+
+    <div class="hintbox" id="hintbox">
+      <div class="lbl">Try saying</div>
+      <div class="ph" id="hintFr"></div>
+      <div class="phen" id="hintEn"></div>
+    </div>
+
+    <div class="actionrow">
+      <button class="btn" id="startBtn">Commencer ▸</button>
+      <button class="btn ghost" id="finishBtn" style="display:none;">Finish &amp; recap</button>
+      <div class="langtoggle">
+        I'll speak:
+        <div class="seg" id="segSpeak" style="width:160px;">
+          <button data-v="fr-FR" class="on">Français</button>
+          <button data-v="en-US">English</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="typebar" id="typebar">
+      <input type="text" id="typeInput" placeholder="Type your answer instead…">
+      <button class="btn" id="typeSend">Send</button>
+    </div>
+  </div>
+
+  <footer>No internet needed · made just for you</footer>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <button class="mic" id="micBtn" disabled aria-label="microphone">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    </button>
+    <div class="status" id="status">Set up your lesson, then press Commencer.</div>
+    <div class="minibtns">
+      <button id="hintBtn">Donne-moi un indice</button>
+      <button id="repeatBtn">Répète</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- conversation scenarios (offline brain) ---------------- */
+/* each step: tutor prompt (fr/en), a model learner reply (hint/hintEn),
+   and 'accept' keywords used only to give gentle praise vs. modelling. */
+const PRAISE = ["Très bien !","Parfait !","Bravo !","Excellent !","C'est ça !","Super !"];
+const SCENARIOS = {
+  free:[
+    {fr:"Bonjour ! Comment allez-vous aujourd'hui ?",en:"Hello! How are you today?",hint:"Je vais bien, merci. Et vous ?",hintEn:"I'm well, thank you. And you?",accept:["bien","ca va","fatigue","super","mal","comme ci","et vous"]},
+    {fr:"Content de l'entendre ! Comment vous appelez-vous ?",en:"Glad to hear it! What's your name?",hint:"Je m'appelle… (votre nom).",hintEn:"My name is… (your name).",accept:["appelle","je suis","nom","moi c est"]},
+    {fr:"Enchanté ! Et d'où venez-vous ?",en:"Pleased to meet you! And where are you from?",hint:"Je viens d'Angleterre.",hintEn:"I come from England.",accept:["viens","habite","angleterre","france","etats","irlande","ecosse","pays","ville","de"]},
+    {fr:"Ah, intéressant ! Depuis combien de temps apprenez-vous le français ?",en:"How interesting! How long have you been learning French?",hint:"J'apprends le français depuis deux ans.",hintEn:"I've been learning French for two years.",accept:["depuis","ans","mois","apprends","commence","longtemps","annee","an"]},
+    {fr:"Bravo, c'est un bel effort ! Pourquoi apprenez-vous le français ?",en:"Well done, that's a real effort! Why are you learning French?",hint:"J'apprends pour voyager en France.",hintEn:"I'm learning in order to travel in France.",accept:["voyage","travail","plaisir","famille","france","aime","culture","pour","vacances"]},
+    {fr:"Une excellente raison ! Merci pour cette belle conversation.",en:"An excellent reason! Thank you for this lovely conversation.",hint:"Merci à vous, au revoir !",hintEn:"Thank you, goodbye!",accept:["merci","revoir","bientot","plaisir","aussi"],last:true}
+  ],
+  cafe:[
+    {fr:"Bonjour et bienvenue ! Une table pour une personne ?",en:"Hello and welcome! A table for one?",hint:"Oui, une table pour une personne, s'il vous plaît.",hintEn:"Yes, a table for one, please.",accept:["oui","table","personne","merci","deux","seul","non"]},
+    {fr:"Très bien. Qu'est-ce que vous voulez boire ?",en:"Very good. What would you like to drink?",hint:"Je voudrais un café, s'il vous plaît.",hintEn:"I'd like a coffee, please.",accept:["cafe","the","eau","vin","biere","jus","voudrais","prends","chocolat","verre"]},
+    {fr:"Et pour manger ? Nous avons des croissants, des sandwichs et des quiches.",en:"And to eat? We have croissants, sandwiches and quiches.",hint:"Je vais prendre un croissant.",hintEn:"I'll have a croissant.",accept:["croissant","sandwich","quiche","prends","voudrais","rien","faim","gateau","tarte"]},
+    {fr:"Parfait. Vous voulez de l'eau aussi ?",en:"Perfect. Would you like some water too?",hint:"Oui, une carafe d'eau, s'il vous plaît.",hintEn:"Yes, a jug of water, please.",accept:["oui","non","eau","carafe","merci","plate","gazeuse"]},
+    {fr:"Je vous apporte ça tout de suite… Et voilà ! Bon appétit. C'est bon ?",en:"I'll bring that right away… There you go! Enjoy. Is it good?",hint:"Oui, c'est délicieux, merci !",hintEn:"Yes, it's delicious, thank you!",accept:["oui","bon","delicieux","tres","merci","excellent","parfait"]},
+    {fr:"Je suis ravi que ça vous plaise. Vous désirez autre chose ?",en:"I'm delighted you like it. Would you like anything else?",hint:"Non merci, l'addition s'il vous plaît.",hintEn:"No thank you, the bill please.",accept:["non","tout","merci","addition","rien","oui","encore"]},
+    {fr:"Bien sûr. Voici l'addition : douze euros cinquante.",en:"Of course. Here's the bill: twelve euros fifty.",hint:"Je peux payer par carte ?",hintEn:"Can I pay by card?",accept:["carte","especes","payer","euros","voila","tenez","peux","comment"]},
+    {fr:"Pas de problème. Merci beaucoup et bonne journée !",en:"No problem. Thank you very much and have a good day!",hint:"Merci, au revoir !",hintEn:"Thank you, goodbye!",accept:["merci","revoir","journee","bonne","aussi","vous"],last:true}
+  ],
+  market:[
+    {fr:"Bonjour ! Vous désirez ?",en:"Hello! What would you like?",hint:"Bonjour, je voudrais des pommes, s'il vous plaît.",hintEn:"Hello, I'd like some apples, please.",accept:["pommes","tomates","fromage","pain","fraises","voudrais","bonjour","oranges","salade"]},
+    {fr:"Très bien. Combien en voulez-vous ?",en:"Very good. How many would you like?",hint:"Un kilo, s'il vous plaît.",hintEn:"A kilo, please.",accept:["kilo","grammes","deux","trois","un","une","livre","peu","beaucoup"]},
+    {fr:"Voilà. Et avec ça ?",en:"There you are. Anything else?",hint:"Je voudrais aussi du fromage.",hintEn:"I'd also like some cheese.",accept:["fromage","pain","oeufs","aussi","voudrais","rien","tout","non"]},
+    {fr:"Ce fromage de chèvre est excellent. Vous en voulez un morceau ?",en:"This goat's cheese is excellent. Would you like a piece?",hint:"Oui, un petit morceau.",hintEn:"Yes, a small piece.",accept:["oui","non","morceau","petit","grand","merci"]},
+    {fr:"Parfait. Ce sera tout ?",en:"Perfect. Will that be all?",hint:"Oui, c'est tout, merci.",hintEn:"Yes, that's all, thank you.",accept:["oui","tout","non","merci","combien","aussi"]},
+    {fr:"Alors, ça fait huit euros vingt.",en:"So, that comes to eight euros twenty.",hint:"Voilà. Merci !",hintEn:"Here you go. Thank you!",accept:["voila","tenez","euros","carte","merci","combien"]},
+    {fr:"Merci beaucoup ! Bonne journée et à bientôt !",en:"Thank you very much! Have a good day and see you soon!",hint:"Au revoir, bonne journée !",hintEn:"Goodbye, have a good day!",accept:["revoir","bientot","merci","journee","bonne","aussi"],last:true}
+  ],
+  directions:[
+    {fr:"Bonjour ! Vous avez l'air perdu. Je peux vous aider ?",en:"Hello! You look lost. Can I help you?",hint:"Oui, je cherche la gare, s'il vous plaît.",hintEn:"Yes, I'm looking for the station, please.",accept:["oui","cherche","gare","ou","pharmacie","musee","toilettes","aider","centre"]},
+    {fr:"La gare ? Alors, continuez tout droit jusqu'au feu. Vous comprenez ?",en:"The station? So, carry straight on to the traffic light. Do you understand?",hint:"Oui, tout droit jusqu'au feu.",hintEn:"Yes, straight on to the light.",accept:["oui","compris","comprends","tout droit","droit","feu","non","repetez"]},
+    {fr:"Ensuite, tournez à gauche à la boulangerie. D'accord ?",en:"Then turn left at the bakery. All right?",hint:"À gauche à la boulangerie, d'accord.",hintEn:"Left at the bakery, all right.",accept:["gauche","droite","boulangerie","accord","oui","compris"]},
+    {fr:"La gare est juste en face, à côté du parc. C'est à cinq minutes à pied.",en:"The station is right opposite, next to the park. It's a five-minute walk.",hint:"C'est loin ?",hintEn:"Is it far?",accept:["loin","minutes","pied","merci","face","parc","combien"]},
+    {fr:"Voilà ! Vous avez d'autres questions ?",en:"There you go! Do you have any other questions?",hint:"Non, c'est clair, merci beaucoup !",hintEn:"No, it's clear, thank you very much!",accept:["non","oui","clair","merci","question","compris"]},
+    {fr:"Avec plaisir. Bonne route et bonne journée !",en:"With pleasure. Safe travels and have a good day!",hint:"Merci, au revoir !",hintEn:"Thank you, goodbye!",accept:["merci","revoir","journee","route","aussi"],last:true}
+  ],
+  day:[
+    {fr:"Bonjour ! Racontez-moi : à quelle heure vous vous levez le matin ?",en:"Hello! Tell me: what time do you get up in the morning?",hint:"Je me lève à sept heures.",hintEn:"I get up at seven o'clock.",accept:["heure","leve","matin","tot","tard","vers"]},
+    {fr:"Et qu'est-ce que vous prenez au petit-déjeuner ?",en:"And what do you have for breakfast?",hint:"Je prends un café et des tartines.",hintEn:"I have a coffee and some toast.",accept:["cafe","the","pain","tartine","oeufs","rien","mange","prends","croissant","fruit"]},
+    {fr:"Qu'est-ce que vous faites dans la journée ? Vous travaillez ?",en:"What do you do during the day? Do you work?",hint:"Oui, je travaille dans un bureau.",hintEn:"Yes, I work in an office.",accept:["travaille","bureau","maison","etudie","retraite","non","oui","jardin"]},
+    {fr:"Intéressant ! Et le soir, qu'est-ce que vous aimez faire ?",en:"Interesting! And in the evening, what do you like to do?",hint:"Le soir, j'aime lire et regarder la télé.",hintEn:"In the evening I like to read and watch TV.",accept:["lire","tele","regarde","cuisine","sport","musique","aime","soir","sors","repose"]},
+    {fr:"Très bien ! À quelle heure vous vous couchez ?",en:"Very good! What time do you go to bed?",hint:"Je me couche vers onze heures.",hintEn:"I go to bed around eleven.",accept:["couche","heure","tard","tot","minuit","vers"]},
+    {fr:"Merci de m'avoir raconté votre journée, c'était un plaisir !",en:"Thank you for telling me about your day, it was a pleasure!",hint:"Merci à vous, au revoir !",hintEn:"Thank you, goodbye!",accept:["merci","plaisir","aussi","revoir"],last:true}
+  ],
+  hobbies:[
+    {fr:"Bonjour ! Dites-moi, qu'est-ce que vous aimez faire le week-end ?",en:"Hello! Tell me, what do you like to do at the weekend?",hint:"Le week-end, j'aime me promener.",hintEn:"At the weekend I like to go for walks.",accept:["aime","promener","sport","lire","film","musique","cuisine","voyage","sors","amis","jardin","repose"]},
+    {fr:"Super ! Vous avez un film ou une série préférée ?",en:"Great! Do you have a favourite film or series?",hint:"J'aime beaucoup les films d'action.",hintEn:"I really like action films.",accept:["film","serie","action","comedie","aime","prefere","regarde","non","documentaire"]},
+    {fr:"Et vous lisez parfois en français ?",en:"And do you sometimes read in French?",hint:"Oui, je lis des livres simples.",hintEn:"Yes, I read simple books.",accept:["oui","non","lis","livre","journal","essaie","difficile","simple","parfois","bd"]},
+    {fr:"C'est une bonne idée pour progresser ! Vous faites du sport ?",en:"That's a good idea for making progress! Do you do any sport?",hint:"Oui, je fais de la marche.",hintEn:"Yes, I do walking.",accept:["oui","non","sport","marche","velo","nage","foot","course","gym","yoga","danse"]},
+    {fr:"Génial. Quel est votre rêve pour les vacances ?",en:"Wonderful. What's your dream for the holidays?",hint:"Je rêve d'aller en France.",hintEn:"I dream of going to France.",accept:["france","reve","vacances","aller","voyage","mer","montagne","visiter","soleil","plage"]},
+    {fr:"Quel beau projet ! Merci pour cette conversation très agréable.",en:"What a lovely plan! Thank you for this very pleasant conversation.",hint:"Merci à vous, à bientôt !",hintEn:"Thank you, see you soon!",accept:["merci","bientot","revoir","aussi","plaisir"],last:true}
+  ]
+};
+
+/* ---------------- state ---------------- */
+const state = {
+  level:"A2", help:"on", scenarioId:"free", hes:7, speakLang:"fr-FR",
+  steps:null, step:0, started:false, turn:"idle",
+  recog:null, recognizing:false, voices:[], frVoice:null, enVoice:null,
+  lastHint:"", lastHintEn:"", escalation:0, hesTimer:null, muteResults:false
+};
+
+/* ---------------- elements ---------------- */
+const el = id => document.getElementById(id);
+const convo = el("convo"), statusEl = el("status"), micBtn = el("micBtn");
+const hintbox = el("hintbox"), hintFr = el("hintFr"), hintEn = el("hintEn");
+
+/* ---------------- settings ---------------- */
+function wireSeg(segId,key,after){
+  const seg = el(segId);
+  seg.addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    [...seg.children].forEach(c=>c.classList.remove("on"));
+    b.classList.add("on"); state[key]=b.dataset.v; if(after) after();
+  });
+}
+wireSeg("segLevel","level");
+wireSeg("segHelp","help");
+wireSeg("segSpeak","speakLang");
+el("scenario").addEventListener("change",e=> state.scenarioId=e.target.value);
+el("hesRange").addEventListener("input",e=>{ state.hes=parseInt(e.target.value,10); el("hesVal").textContent=state.hes+" sec"; });
+
+/* ---------------- voices / TTS ---------------- */
+function loadVoices(){
+  state.voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+  state.frVoice = state.voices.find(v=>/fr-FR/i.test(v.lang)) || state.voices.find(v=>/^fr/i.test(v.lang)) || null;
+  state.enVoice = state.voices.find(v=>/en-GB/i.test(v.lang)) || state.voices.find(v=>/^en/i.test(v.lang)) || null;
+}
+if(window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function speak(text,lang,ondone){
+  if(!window.speechSynthesis || !text){ if(ondone) ondone(); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if(lang==="fr"){ u.voice=state.frVoice; u.lang="fr-FR"; u.rate=0.95; }
+  else { u.voice=state.enVoice; u.lang="en-GB"; u.rate=1.0; }
+  let done=false;
+  state.muteResults=true; // ignore anything the mic catches while we speak
+  const finish=()=>{ if(!done){ done=true; state.muteResults=false; micBtn.classList.remove("speaking"); if(ondone) ondone(); } };
+  micBtn.classList.add("speaking");
+  u.onend=finish; u.onerror=finish;
+  speechSynthesis.speak(u);
+}
+
+/* ---------------- speech recognition support ---------------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+(function banner(){
+  const b=el("srBanner");
+  if(!SR){
+    b.classList.add("show");
+    b.innerHTML="Voice input needs <b>Chrome or Edge on a laptop</b>. Your tutor will still speak aloud — type your answers in the box and everything else works the same.";
+    el("typebar").classList.add("show");
+  } else if(location.protocol==="file:"){
+    b.classList.add("show");
+    b.innerHTML="You've opened this as a downloaded file, so your browser won't remember the microphone and keeps re-asking. <b>To grant it just once:</b> serve the folder over <code>localhost</code> (e.g. run <code>python3 -m http.server</code> in the folder, then open <code>http://localhost:8000/french-tutor.html</code>), or view it inside Claude. Picking <i>Allow while visiting the site</i> will reduce the prompts in the meantime.";
+  }
+})();
+
+/* ---------------- rendering ---------------- */
+function clearPlaceholder(){ const p=convo.querySelector(".placeholder"); if(p) p.remove(); }
+function addTurn(who,fr,en,correction){
+  clearPlaceholder();
+  const div=document.createElement("div");
+  div.className="turn "+(who==="tutor"?"tutor":"you");
+  div.innerHTML='<div class="who">'+(who==="tutor"?"Tuteur":"Vous")+'</div><div class="fr"></div>'+
+    (en?'<div class="en"></div>':'')+(correction?'<div class="correction"></div>':'');
+  div.querySelector(".fr").textContent=fr;
+  if(en) div.querySelector(".en").textContent=en;
+  if(correction) div.querySelector(".correction").textContent="✎ "+correction;
+  convo.appendChild(div); convo.scrollTo({top:convo.scrollHeight,behavior:"smooth"});
+}
+function setStatus(html){ statusEl.innerHTML=html; }
+function showEn(en){ return state.help==="on" ? en : ""; }
+
+/* ---------------- text matching ---------------- */
+function norm(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim(); }
+function matches(text,accept){
+  if(!accept || !accept.length) return true;
+  const n=norm(text);
+  return accept.some(k=> n.includes(norm(k)));
+}
+
+/* ---------------- conversation flow ---------------- */
+function presentStep(i){
+  const step=state.steps[i];
+  state.lastHint=step.hint; state.lastHintEn=step.hintEn;
+  addTurn("tutor",step.fr,showEn(step.en),"");
+  hideHint();
+  speak(step.fr,"fr",()=> beginUserTurn());
+}
+function beginUserTurn(){
+  if(!state.started) return;
+  state.turn="user"; state.escalation=0;
+  const lng = state.speakLang==="fr-FR" ? "en français" : "in English";
+  setStatus("À vous — <b>parlez "+lng+"</b>. Take your time.");
+  if(!SR){ el("typebar").classList.add("show"); return; }
+  startListening(); startHesTimer();
+}
+
+function handleUserUtterance(text){
+  stopListening();
+  // English mode = "help me": model the phrase, stay on the same step
+  if(state.speakLang==="en-US"){
+    addTurn("you",text,"","");
+    state.turn="tutor";
+    const help="Bien sûr ! Vous pouvez répondre : « "+state.lastHint+" »";
+    addTurn("tutor",help,showEn("Sure! You can answer: \u201C"+state.lastHintEn+"\u201D"),"");
+    showHint();
+    speak(help,"fr",()=> beginUserTurn());
+    return;
+  }
+  const step=state.steps[state.step];
+  const ok=matches(text,step.accept);
+  const fb = ok ? PRAISE[Math.floor(Math.random()*PRAISE.length)]
+                : "Presque — une façon naturelle de le dire : « "+step.hint+" »";
+  addTurn("you",text,"",fb);
+  state.turn="tutor";
+  state.step++;
+  if(state.step >= state.steps.length || state.steps[state.step-1].last){
+    setTimeout(recap, 400);
+  } else {
+    setTimeout(()=> presentStep(state.step), 350);
+  }
+}
+
+function recap(){
+  addTurn("tutor","Bravo ! Vous êtes arrivé au bout de la conversation.",
+          showEn("Well done! You made it all the way through the conversation."),
+          "You finished a whole conversation start to finish — that's the win you were after. Next time, try to start your answer before the first nudge.");
+  speak("Bravo ! Vous êtes arrivé au bout de la conversation.","fr");
+  endLesson();
+}
+
+/* ---------------- hesitation engine ---------------- */
+function startHesTimer(){ clearTimeout(state.hesTimer); state.hesTimer=setTimeout(onHesitate,state.hes*1000); }
+function clearHesTimer(){ clearTimeout(state.hesTimer); state.hesTimer=null; }
+function onHesitate(){
+  if(state.turn!=="user") return;
+  state.escalation++;
+  // keep the mic session open; speak() mutes results so the nudge isn't transcribed
+  if(state.escalation===1){
+    setStatus("<b>Prenez votre temps…</b> I'm listening.");
+    speak("Prenez votre temps. Vous pouvez commencer quand vous voulez.","fr",()=>{
+      if(state.turn==="user") startHesTimer();
+    });
+  } else if(state.escalation===2 && state.lastHint){
+    showHint(); setStatus("Here's something you could say — read it aloud when you're ready.");
+    speak("Vous pourriez dire : "+state.lastHint,"fr",()=>{
+      if(state.turn==="user") startHesTimer();
+    });
+  } else {
+    showHint(); setStatus("No rush. Speak when you're ready, or type below.");
+    el("typebar").classList.add("show");
+  }
+}
+
+/* ---------------- recognition (single reused session) ---------------- */
+function getRecognition(){
+  if(state.recog) return state.recog;
+  if(!SR) return null;
+  const r=new SR();
+  r.interimResults=true; r.continuous=true; r.maxAlternatives=1;
+  r.onstart=()=>{ state.recognizing=true; micBtn.classList.add("listening"); };
+  r.onspeechstart=()=>{ if(!state.muteResults) clearHesTimer(); };
+  r.onresult=(e)=>{
+    if(state.muteResults) return;            // don't transcribe the tutor's own voice
+    let interim="",final="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal) final+=t; else interim+=t;
+    }
+    if(interim) clearHesTimer();
+    if(final.trim()) handleUserUtterance(final.trim());
+  };
+  r.onerror=(e)=>{
+    state.recognizing=false; micBtn.classList.remove("listening");
+    if(e.error==="not-allowed"||e.error==="service-not-allowed"){
+      setStatus("I can't reach the mic — allow access, or type below.");
+      el("typebar").classList.add("show");
+    }
+  };
+  r.onend=()=>{
+    state.recognizing=false; micBtn.classList.remove("listening");
+    // a continuous session can still time out; quietly resume if it's still your turn
+    if(state.turn==="user" && state.started){ try{ r.start(); }catch(_){} }
+  };
+  state.recog=r;
+  return r;
+}
+function startListening(){
+  if(!SR){ el("typebar").classList.add("show"); return; }
+  if(state.recognizing) return;
+  const r=getRecognition(); if(!r) return;
+  r.lang=state.speakLang;
+  try{ r.start(); }catch(_){}
+}
+function stopListening(){
+  clearHesTimer();
+  if(state.recog && state.recognizing){
+    state.recog.onend=()=>{ state.recognizing=false; micBtn.classList.remove("listening"); };
+    try{ state.recog.stop(); }catch(_){}
+    // restore the auto-resume handler for next turn
+    const r=state.recog;
+    setTimeout(()=>{ r.onend=()=>{ state.recognizing=false; micBtn.classList.remove("listening"); if(state.turn==="user"&&state.started){try{r.start();}catch(_){}} }; },50);
+  }
+  state.recognizing=false; micBtn.classList.remove("listening");
+}
+
+/* ---------------- hint box ---------------- */
+function showHint(){
+  if(!state.lastHint) return;
+  hintFr.textContent=state.lastHint;
+  hintEn.textContent = state.help==="on" ? (state.lastHintEn||"") : "";
+  hintbox.classList.add("show");
+}
+function hideHint(){ hintbox.classList.remove("show"); }
+
+/* ---------------- buttons ---------------- */
+micBtn.addEventListener("click",()=>{
+  if(!state.started) return;
+  if(state.recognizing){ stopListening(); setStatus("Paused. Tap the mic to continue."); }
+  else if(state.turn==="user"){ startListening(); startHesTimer(); setStatus("Listening — go ahead."); }
+});
+el("hintBtn").addEventListener("click",()=>{
+  if(!state.lastHint){ setStatus("Press Commencer first — then a phrase is always ready here."); return; }
+  showHint(); speak(state.lastHint,"fr");
+});
+el("repeatBtn").addEventListener("click",()=>{
+  const ts=[...convo.querySelectorAll(".turn.tutor .fr")];
+  const last=ts[ts.length-1];
+  if(last) speak(last.textContent,"fr",()=>{ if(state.turn==="user"){ startListening(); startHesTimer(); } });
+});
+el("typeSend").addEventListener("click",sendTyped);
+el("typeInput").addEventListener("keydown",e=>{ if(e.key==="Enter") sendTyped(); });
+function sendTyped(){
+  const v=el("typeInput").value.trim(); if(!v||!state.started||state.turn!=="user") return;
+  el("typeInput").value=""; handleUserUtterance(v);
+}
+el("startBtn").addEventListener("click",startLesson);
+el("finishBtn").addEventListener("click",()=>{ if(state.started){ stopListening(); state.turn="tutor"; recap(); } });
+
+function startLesson(){
+  state.started=true; state.steps=SCENARIOS[state.scenarioId]; state.step=0;
+  convo.innerHTML=""; el("settingsPanel").open=false;
+  el("startBtn").style.display="none"; el("finishBtn").style.display="inline-block";
+  micBtn.disabled=false;
+  presentStep(0);
+}
+function endLesson(){
+  state.started=false; state.turn="idle"; stopListening(); micBtn.disabled=true;
+  el("finishBtn").style.display="none";
+  el("startBtn").style.display="inline-block"; el("startBtn").textContent="Recommencer ▸";
+  el("settingsPanel").open=true;
+  setStatus("Lesson finished. Pick another conversation and press Recommencer.");
+}
+</script>
+</body>
+</html>
